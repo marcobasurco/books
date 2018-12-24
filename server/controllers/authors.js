@@ -1,4 +1,5 @@
-var Author = require('../models/author.js');
+var Author = require('../models/author.js'),
+    Book = require('../models/book.js');
 
 module.exports = {
     getAuthors: function (req, res){
@@ -19,29 +20,51 @@ module.exports = {
             }
         })
     },
+
     deleteAuthorByID: function (req, res) {
-        Author.deleteOne( {_id: req.params.id}, function(err, authors){
+        Author.find({_id: req.params.id}, function(err, author){
             if (err) {
-                res.json({ message: "Error when deleting the author by ID: ", error: err});
+                res.json({ message: "Error collecting data:", err});
             } else {
-                res.json({ message: "Success", data: authors });
+                var booksToDelete = author[0].books;
+                for (let book of booksToDelete){
+                    console.log(book._id);
+                    Book.deleteOne({_id: book._id}, function(err){
+                        if (err) {
+                            console.log(err);
+                        }
+                    })
+                }
+                Author.deleteOne({_id: req.params.id}, function(err) {
+                    if (err) {
+                        res.json(err);
+                    } else {
+                        res.json({message: "author deleted"})
+                    }
+                })
             }
         })
     },
+    
     createAuthor: function (req, res) {
         var newAuthor = new Author(req.body);
         newAuthor.save(function(err) {
             if (err) {
                 res.json({ message: "Error writing to the database: ", err});
+            } else {
+                res.json({ message: "Success Adding Author"});
             }
         })
     },
     editAuthor: function (req, res) {
-        Author.update({_id: req.params.id}, req.body, function(err){
+        Author.updateOne({_id: req.params.id}, req.body, function(err){
             if (err) {
                 res.json({ mesaage: "I could not edit the book in database: ", err });
+            } else {
+                res.json({ message: "Success Editing Author"});
             }
         })
     }
 }
+
 
