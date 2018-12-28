@@ -27,5 +27,3 @@ var gameLoop = function() {
 
 gameLoop();
 
-var [{color: firstColor}, {color: secondColor}] = suspects;
-
